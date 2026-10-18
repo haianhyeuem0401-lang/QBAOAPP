@@ -16,6 +16,12 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
+      - name: Inspect project
+        run: |
+          pwd
+          ls -la
+          find . -maxdepth 4 -type f \( -name gradlew -o -name settings.gradle.kts -o -name build.gradle.kts \)
+
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
@@ -25,10 +31,13 @@ jobs:
       - name: Build APK
         shell: bash
         run: |
-          if [ ! -f gradlew ]; then
-            echo "Khong tim thay gradlew o thu muc goc"
+          WRAPPER=$(find . -maxdepth 5 -type f -name gradlew | head -n 1)
+          if [ -z "$WRAPPER" ]; then
+            echo "Chua co Gradle Wrapper"
             exit 1
           fi
+          PROJECT_DIR=$(dirname "$WRAPPER")
+          cd "$PROJECT_DIR"
           chmod +x gradlew
           ./gradlew assembleDebug
 
